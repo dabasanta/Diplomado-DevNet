@@ -7,7 +7,7 @@ import uasyncio as asyncio
 
 # Credenciales de WiFi
 ssid = 'RedRoom'
-password = '*Skills39*'
+password = '******'
 
 # Conectarse a WiFi
 wlan = network.WLAN(network.STA_IF)
@@ -23,7 +23,7 @@ print('Network connected:', wlan.ifconfig())
 auth_url = 'http://34.71.210.97:5000/login'
 auth_data = {
     "username": "admin",
-    "password": "BestSecurePassword"
+    "password": "*******"
 }
 response = urequests.post(auth_url, headers = {'Content-Type': 'application/json'}, data = ujson.dumps(auth_data))
 access_token = response.json().get('access_token')
