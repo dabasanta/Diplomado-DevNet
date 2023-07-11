@@ -1,3 +1,4 @@
+from telegram_bot import TelegramBot
 from flask import Flask, jsonify, request
 from flask_mysqldb import MySQL
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
@@ -103,6 +104,9 @@ def save_log():
         INSERT INTO road_logs (latitud, longitud, fecha, velocidad, alerta)
         VALUES (%s, %s, %s, %s, %s)
         """
+        if velocidad > 5.00:
+            bot = TelegramBot('6399352423:AAG6qacChJxhhR1jvdaVtRJb8YItMz7QJBM', '486241032')
+            bot.send_message(f'Alerta de velocidad alta: {velocidad}')
 
         # Ejecuta la sentencia SQL
         cursor.execute(query, (latitud, longitud, fecha, velocidad, alerta))
@@ -116,3 +120,4 @@ def save_log():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+    
