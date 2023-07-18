@@ -1,3 +1,21 @@
+# Video 1 (5min) PPTX
+# Video 2 (5min) explicacion de campo
+
+# Comenzar con la introduccion
+# Comenzar videos con datos e historicos
+# Pregunta problema
+# DePresentar equipo de trabajo y debido a lo anterior hemos creado la empresa tal (Logo)
+# Objetivo
+# Fases del proyecto e implementacion
+# - Investiacion
+#  - Diseno
+#   - Implementacion
+
+# Tabla de costo
+
+# A coninuacion, les mostramos el video del funcionamiento
+
+
 import urequests
 import network
 from machine import Pin, time_pulse_us, UART
@@ -7,7 +25,7 @@ import uasyncio as asyncio
 
 # Credenciales de WiFi
 ssid = 'RedRoom'
-password = '******'
+password = '*Skills39*'
 
 # Conectarse a WiFi
 wlan = network.WLAN(network.STA_IF)
@@ -23,7 +41,7 @@ print('Network connected:', wlan.ifconfig())
 auth_url = 'http://34.71.210.97:5000/login'
 auth_data = {
     "username": "admin",
-    "password": "*******"
+    "password": "BestSecurePassword"
 }
 response = urequests.post(auth_url, headers = {'Content-Type': 'application/json'}, data = ujson.dumps(auth_data))
 access_token = response.json().get('access_token')
@@ -102,7 +120,7 @@ async def main():
         dist_izquierdo = get_distance(trig_izquierdo, echo_izquierdo)
         dist_derecho = get_distance(trig_derecho, echo_derecho)
 
-        if dist_izquierdo < 100 or dist_derecho < 100:
+        if dist_izquierdo < 5 or dist_derecho < 5:
             print('Distancia menor a 100 CM en el sensor izquierdo' if dist_izquierdo < 100 else 'Distancia menor a 100 CM en el sensor derecho')
             
             time_start = time.time()
@@ -123,11 +141,11 @@ async def main():
                 }
                 print(ujson.dumps(incident))
 
-                # URL de la API a la que enviarás la solicitud PUT
-                url = 'http://34.71.210.97:5000/save'
+                # URL de la API a la que enviarás la solicitud POST
+                url = 'http://34.71.210.97:5000/save_log'
 
                 # Enviar solicitud PUT
-                response = urequests.put(url, headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + access_token}, data = ujson.dumps(incident))
+                response = urequests.post(url, headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + access_token}, data = ujson.dumps(incident))
 
                 # Comprueba el código de estado de la respuesta
                 if response.status_code < 400:

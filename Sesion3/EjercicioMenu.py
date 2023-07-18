@@ -58,7 +58,6 @@ def ejecutar_opcion(opcion):
     else:
         print("Opción inválida. Por favor, selecciona una opción válida del menú.")
 
-# Programa principal
 mostrar_menu()
 opcion = seleccionar_opcion()
 ejecutar_opcion(opcion)
