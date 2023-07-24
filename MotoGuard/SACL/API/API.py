@@ -1,27 +1,25 @@
-from telegram_bot import TelegramBot
+from datetime import datetime
 from flask import Flask, jsonify, request
 from flask_mysqldb import MySQL
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token
-from flask_cors import CORS  # Importa la biblioteca CORS
-
+from flask_cors import CORS
+from telegram_bot import TelegramBot
 
 app = Flask(__name__)
-CORS(app)  # Aplica CORS para todos los recursos
+CORS(app)
 
-# Configuración de la base de datos
-app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_HOST'] = '34.71.210.97'
 app.config['MYSQL_USER'] = 'operator'
 app.config['MYSQL_PASSWORD'] = 'SuperSecretPassword$'
 app.config['MYSQL_DB'] = 'SACL'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
-# Configuración de Flask-JWT-Extended
-app.config['JWT_SECRET_KEY'] = 'SuperSecretKeyAccessGalactikMachine(*^#'  # Cambia esto por tu clave secreta real
+app.config['JWT_SECRET_KEY'] = 'SuperSecretKeyAccessGalactikMachine(*^#'
 jwt = JWTManager(app)
 
 mysql = MySQL(app)
 
-@jwt_required  # Protege el método con autenticación JWT
+@jwt_required
 @app.route('/profile', methods=['GET'])
 def get_profile():
     try:
@@ -42,8 +40,7 @@ def get_profile():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@jwt_required  # Protege el método con autenticación JWT
+@jwt_required
 @app.route('/logs', methods=['GET'])
 def get_logs():
     try:
@@ -67,16 +64,13 @@ def get_logs():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/login', methods=['POST'])
 def login():
     try:
         username = request.json.get('username')
         password = request.json.get('password')
 
-        # Verificar las credenciales del usuario (por ejemplo, en una base de datos)
         if username == 'admin' and password == 'BestSecurePassword':
-            # Generar un token de acceso JWT válido
             access_token = create_access_token(identity=username)
             return jsonify({'access_token': access_token}), 200
         else:
@@ -85,12 +79,11 @@ def login():
         return jsonify({'error': str(e)}), 500
 
 @jwt_required
-@app.route('/save', methods=['PUT'])
+@app.route('/save_log', methods=['POST'])
 def save_log():
     try:
-        data = request.get_json()  # Obtén los datos del cuerpo de la solicitud
+        data = request.get_json()
 
-        # Extrae los datos
         longitud = data['longitud']
         latitud = data['latitud']
         fecha = data['fecha']
@@ -98,26 +91,30 @@ def save_log():
         alerta = data['alerta']
 
         cursor = mysql.connection.cursor()
-
-        # Prepara la sentencia SQL
         query = """
         INSERT INTO road_logs (latitud, longitud, fecha, velocidad, alerta)
         VALUES (%s, %s, %s, %s, %s)
         """
-        if velocidad > 5.00:
-            bot = TelegramBot('6399352423:AAG6qacChJxhhR1jvdaVtRJb8YItMz7QJBM', '486241032')
-            bot.send_message(f'Alerta de velocidad alta: {velocidad}')
-
-        # Ejecuta la sentencia SQL
         cursor.execute(query, (latitud, longitud, fecha, velocidad, alerta))
-        mysql.connection.commit()  # Confirma la transacción
+        mysql.connection.commit()
         cursor.close()
+        
+        db_config = {
+        'host': '34.71.210.97',
+        'user': 'operator',
+        'password': 'SuperSecretPassword$',
+        'database': 'SACL'
+    }
+        
+        if velocidad > 20.00:
+            bot = TelegramBot("6399352423:AAG6qacChJxhhR1jvdaVtRJb8YItMz7QJBM", db_config)
+            chat_id = '486241032'
+            bot.send_message(chat_id='486241032', text=f"*Alerta de alta velocidad:* {velocidad} KM/h")
+            bot.send_location(chat_id='486241032', latitude=latitud, longitude=longitud)
 
         return jsonify({'message': 'Datos guardados correctamente'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-    

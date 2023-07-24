@@ -52,6 +52,8 @@ TRIG_IZQUIERDO = 21
 ECHO_IZQUIERDO = 22
 TRIG_DERECHO = 2
 ECHO_DERECHO = 4
+pin_led1 = Pin(13, Pin.OUT)
+pin_led2 = Pin(14, Pin.OUT)
 
 # Configura UART para el GPS
 uart = UART(2, baudrate=9600, tx=17, rx=16)
@@ -120,9 +122,9 @@ async def main():
         dist_izquierdo = get_distance(trig_izquierdo, echo_izquierdo)
         dist_derecho = get_distance(trig_derecho, echo_derecho)
 
-        if dist_izquierdo < 5 or dist_derecho < 5:
+        if dist_izquierdo < 10:
             print('Distancia menor a 100 CM en el sensor izquierdo' if dist_izquierdo < 100 else 'Distancia menor a 100 CM en el sensor derecho')
-            
+            pin_led2.on()
             time_start = time.time()
             while lat is None or lon is None or velocidad is None:
                 print('Buscando GPS')
@@ -153,6 +155,43 @@ async def main():
                 else:
                     print('Error al enviar el incidente: {}'.format(response.status_code))
                 response.close()
+                pin_led2.off()
+
+                
+        if dist_derecho < 10:
+            print('Distancia menor a 100 CM en el sensor izquierdo' if dist_izquierdo < 100 else 'Distancia menor a 100 CM en el sensor derecho')
+            pin_led1.on()
+            time_start = time.time()
+            while lat is None or lon is None or velocidad is None:
+                print('Buscando GPS')
+                await asyncio.sleep(0.5)
+                if time.time() - time_start > 60:
+                    print("Fallo en recopilar los datos del GPS.")
+                    break
+            if lat is not None and lon is not None and velocidad is not None:
+                timestamp = get_formatted_time()
+                incident = {
+                    "alerta": "incidente",
+                    "fecha": timestamp,
+                    "latitud": lat,
+                    "longitud": lon,
+                    "velocidad": velocidad
+                }
+                print(ujson.dumps(incident))
+
+                # URL de la API a la que enviarás la solicitud POST
+                url = 'http://34.71.210.97:5000/save_log'
+
+                # Enviar solicitud PUT
+                response = urequests.post(url, headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + access_token}, data = ujson.dumps(incident))
+
+                # Comprueba el código de estado de la respuesta
+                if response.status_code < 400:
+                    print('Incidente enviado con éxito.')
+                else:
+                    print('Error al enviar el incidente: {}'.format(response.status_code))
+                response.close()
+                pin_led1.off()            
 
         await asyncio.sleep(0.5)
 
