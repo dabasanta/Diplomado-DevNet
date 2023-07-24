@@ -1,0 +1,9 @@
+.mapboxgl-popup-content {
+  background-color: #ffffffa1 !important;
+  border-radius: 20px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.mapboxgl-popup-close-button {
+  right: 0.5rem !important;
+}

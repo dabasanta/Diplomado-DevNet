@@ -80,8 +80,8 @@ async def get_speed():
                 try:
                     velocidad = float(parts[7])
                 except ValueError:
-                    print('Datos de velocidad no válidos recibidos, ignorando este paquete')
-        await asyncio.sleep(0.5)
+                    print('Datos de velocidad no recibidos')
+    await asyncio.sleep(0.5)
 
 # Función para obtener los datos de latitud y longitud del GPS
 async def get_gps():
@@ -99,8 +99,7 @@ async def get_gps():
                     if parts[5] == 'W':
                         lon *= -1
                 except ValueError:
-                    print('Datos de GPS no válidos recibidos, ignorando este paquete')
-        await asyncio.sleep(0.5)
+                    print('Datos de geolocalizacion no recibidos')
 
 # Function to calculate distance
 def get_distance(trig, echo):
@@ -110,6 +109,7 @@ def get_distance(trig, echo):
     duration = time_pulse_us(echo, 1)
     distance = duration * 340.0 / 2.0 / 10000.0
     return distance
+    await asyncio.sleep(0.5)
 
 def get_formatted_time():
     now = time.localtime()

@@ -12,4 +12,4 @@ token=$(curl -s -X POST -H "Content-Type: application/json" -d "$data" http://34
 datos='{"alerta":"incidente","fecha":"2023-06-24 00:00:00","latitud":"10.986700","longitud":"-74.805000","velocidad":80.6}'
 
 # Enviar la solicitud POST a la API
-curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $token" -d "$datos" http://34.71.210.97:5000/save_log | jq
+curl -s -X POST -H "Content-Type: application/json" -H "Authorization: Bearer $token" -d "$datos" http://34.71.210.97:5000/save_log | jq
