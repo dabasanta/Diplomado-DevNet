@@ -1,3 +1,4 @@
+# Importamos las librerías necesarias
 import requests
 import json
 import time
@@ -7,6 +8,7 @@ import matplotlib.pyplot as plt
 import os
 from datetime import datetime
 
+# Definimos la clase del bot de Telegram
 class TelegramBot:
     def __init__(self, token, db_config):
         self.token = token
@@ -15,11 +17,13 @@ class TelegramBot:
         self.db_config = db_config
         self.connection = None
 
+    # Método para obtener actualizaciones del bot
     def get_updates(self):
         url = self.base_url + f"getUpdates?offset={self.update_id + 1}"
         response = requests.get(url)
         return response.json()
 
+    # Método para enviar un mensaje
     def send_message(self, chat_id, text, reply_markup=None):
         url = self.base_url + f"sendMessage?chat_id={chat_id}&text={text}&parse_mode=Markdown"
         if reply_markup:
@@ -27,11 +31,13 @@ class TelegramBot:
         response = requests.get(url)
         return response.json()
 
+    # Método para enviar una ubicación
     def send_location(self, chat_id, latitude, longitude):
         url = self.base_url + f"sendLocation?chat_id={chat_id}&latitude={latitude}&longitude={longitude}"
         response = requests.get(url)
         return response.json()
 
+    # Método para enviar una foto
     def send_photo(self, chat_id, photo_path):
         url = self.base_url + f"sendPhoto"
         with open(photo_path, 'rb') as photo:
@@ -40,10 +46,11 @@ class TelegramBot:
             response = requests.post(url, files=files, data=data)
         return response.json()
     
+    # Método para resetear el estado del viaje
     def reset_state(self):
         self.ride_start_time = None
 
-
+    # Método para manejar las actualizaciones recibidas
     def handle_updates(self, updates):
         for update in updates["result"]:
             self.update_id = update["update_id"]
@@ -67,15 +74,12 @@ class TelegramBot:
                 elif text.lower() == "ver histórico de alertas":
                     self.send_alerts_barchart(chat_id)
 
-
-
-
-
+    # Método para iniciar un viaje
     def start_ride(self, chat_id):
         keyboard = [[{"text": "Terminar rodada"}]]
         reply_markup = {"keyboard": keyboard, "one_time_keyboard": True}
         
-        # Obtener datos climatologicos
+        # Obtener datos climatológicos
         hora_actual = datetime.now().time()
         hora_amanecer = datetime.strptime("06:00:00", "%H:%M:%S").time()
         hora_anochecer = datetime.strptime("18:00:00", "%H:%M:%S").time()
@@ -104,7 +108,7 @@ class TelegramBot:
         self.send_message(chat_id, f"\U0001F525 ¡La rodada ha iniciado! Presiona en Terminar Rodada cuando hayas terminado. Estare monitoreando el trafico durante tu recorrido \U0001F441 por lo que no podre entregarte estadisticas durante tu rodada.", reply_markup)
         self.ride_start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    
+    # Método para finalizar un viaje
     def end_ride(self, chat_id):
         try:
             if self.ride_start_time:
@@ -154,14 +158,14 @@ class TelegramBot:
         finally:
             self.ride_start_time = None
         
-
+    # Método para calcular la duración del viaje
     def calculate_ride_duration(self, start_time, end_time):
         start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
         end_time = datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S")
         duration = end_time - start_time
         return str(duration)
     
-
+    # Método para enviar las estadísticas recientes
     def send_recent_stats(self, chat_id):
         if self.connection is None or not self.connection.is_connected():
             self.connection = mysql.connector.connect(**self.db_config)
@@ -181,6 +185,7 @@ class TelegramBot:
         if os.path.exists(image_path):
             self.send_photo(chat_id, image_path)
 
+    # Método para enviar todas las estadísticas
     def send_all_stats(self, chat_id):
         if self.connection is None or not self.connection.is_connected():
             self.connection = mysql.connector.connect(**self.db_config)
@@ -209,6 +214,7 @@ class TelegramBot:
         if os.path.exists(image_path):
             self.send_photo(chat_id, image_path)
     
+    # Método para enviar un gráfico de barras de las alertas
     def send_alerts_barchart(self, chat_id):
         if self.connection is None or not self.connection.is_connected():
             self.connection = mysql.connector.connect(**self.db_config)
@@ -243,17 +249,15 @@ class TelegramBot:
         if os.path.exists(image_path):
             self.send_photo(chat_id, image_path)
 
-    
-
-
+# Método principal
 def main():
     db_config = {
         'host': '34.71.210.97',
         'user': 'operator',
-        'password': 'SuperSecretPassword$',
+        'password': '***************',
         'database': 'SACL'
     }
-    bot = TelegramBot("6399352423:AAG6qacChJxhhR1jvdaVtRJb8YItMz7QJBM", db_config)
+    bot = TelegramBot("*********:****************", db_config)
     while True:
         updates = bot.get_updates()
         if updates["ok"]:
