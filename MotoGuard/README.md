@@ -1,3 +1,4 @@
+![motoguardLogo](https://github.com/dabasanta/Diplomado-DevNet/blob/main/MotoGuard/Logo.png?raw=true)
 # Introducción a SACL: Sistema de Alerta de Colisiones Laterales para Motocicletas
 
 SACL son las siglas del Sistema de Alerta de Colisiones Laterales diseñado específicamente para mejorar la seguridad vial de los motociclistas en Barranquilla, Colombia. Este sistema inteligente utiliza tecnología avanzada para detectar y notificar al motociclista sobre la presencia de vehículos que se aproximan desde puntos ciegos, minimizando el riesgo de colisiones laterales.
