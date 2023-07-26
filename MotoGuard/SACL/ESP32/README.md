@@ -10,6 +10,10 @@ sudo apt install python3-pip
 pip3 install flask
 ```
 
+![Instalación de Flask con pip](API%20REST%20385e4e8871594e8b9b39dd47f27eb40e/Untitled.png)
+
+Instalación de Flask con pip
+
 ## Configuración de la base de datos
 
 Para la conexión a la base de datos se ha usado la librería `flask_mysqldb`

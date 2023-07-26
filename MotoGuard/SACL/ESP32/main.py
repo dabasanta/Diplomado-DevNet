@@ -1,27 +1,8 @@
-# Video 1 (5min) PPTX
-# Video 2 (5min) explicacion de campo
-
-# Comenzar con la introduccion
-# Comenzar videos con datos e historicos
-# Pregunta problema
-# DePresentar equipo de trabajo y debido a lo anterior hemos creado la empresa tal (Logo)
-# Objetivo
-# Fases del proyecto e implementacion
-# - Investiacion
-#  - Diseno
-#   - Implementacion
-
-# Tabla de costo
-
-# A coninuacion, les mostramos el video del funcionamiento
-
-
 import urequests
 import network
 from machine import Pin, time_pulse_us, UART
 import ujson
 import time
-import uasyncio as asyncio
 
 # Credenciales de WiFi
 ssid = 'RedRoom'
@@ -69,38 +50,6 @@ velocidad = None
 lat = None
 lon = None
 
-# Función para obtener la velocidad del GPS
-async def get_speed():
-    global velocidad
-    while True:
-        if uart.any():
-            gps_data = uart.readline()
-            parts = gps_data.decode('ascii').split(',')
-            if parts[0] == '$GPVTG':
-                try:
-                    velocidad = float(parts[7])
-                except ValueError:
-                    print('Datos de velocidad no recibidos')
-    await asyncio.sleep(0.5)
-
-# Función para obtener los datos de latitud y longitud del GPS
-async def get_gps():
-    global lat, lon
-    while True:
-        if uart.any():
-            gps_data = uart.readline()
-            parts = gps_data.decode('ascii').split(',')
-            if parts[0] == '$GPGGA':
-                try:
-                    lat = float(parts[2][:2]) + float(parts[2][2:]) / 60
-                    if parts[3] == 'S':
-                        lat *= -1
-                    lon = float(parts[4][:3]) + float(parts[4][3:]) / 60
-                    if parts[5] == 'W':
-                        lon *= -1
-                except ValueError:
-                    print('Datos de geolocalizacion no recibidos')
-
 # Function to calculate distance
 def get_distance(trig, echo):
     trig.value(1)
@@ -109,26 +58,57 @@ def get_distance(trig, echo):
     duration = time_pulse_us(echo, 1)
     distance = duration * 340.0 / 2.0 / 10000.0
     return distance
-    await asyncio.sleep(0.5)
 
 def get_formatted_time():
     now = time.localtime()
     return '{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(now[0], now[1], now[2], now[3], now[4], now[5])
 
-async def main():
+def main():
     global lat, lon, velocidad
 
     while True:
+        # Get speed data
+        if uart.any():
+            try:
+                gps_data = uart.readline()
+                parts = gps_data.decode('ascii').split(',')
+                if parts[0] == '$GPVTG':
+                    try:
+                        velocidad = float(parts[7])
+                    except ValueError:
+                        print('Datos de velocidad no recibidos')
+            except UnicodeError:
+                print('Error Unicode en get_speed')
+
+        # Get GPS data
+        if uart.any():
+            try:
+                gps_data = uart.readline()
+                parts = gps_data.decode('ascii').split(',')
+                if parts[0] == '$GPGGA':
+                    try:
+                        lat = float(parts[2][:2]) + float(parts[2][2:]) / 60
+                        if parts[3] == 'S':
+                            lat *= -1
+                        lon = float(parts[4][:3]) + float(parts[4][3:]) / 60
+                        if parts[5] == 'W':
+                            lon *= -1
+                    except ValueError:
+                        print('Datos de geolocalizacion no recibidos')
+            except UnicodeError:
+                print('Error Unicode en get_gps')
+
+        # Main function logic
         dist_izquierdo = get_distance(trig_izquierdo, echo_izquierdo)
         dist_derecho = get_distance(trig_derecho, echo_derecho)
 
-        if dist_izquierdo < 10:
+        if dist_izquierdo < 10 or dist_derecho < 10:
             print('Distancia menor a 100 CM en el sensor izquierdo' if dist_izquierdo < 100 else 'Distancia menor a 100 CM en el sensor derecho')
-            pin_led2.on()
+            pin_led2.on() if dist_izquierdo < 10 else pin_led1.on()
             time_start = time.time()
             while lat is None or lon is None or velocidad is None:
                 print('Buscando GPS')
-                await asyncio.sleep(0.5)
+                time.sleep(0.5)
                 if time.time() - time_start > 60:
                     print("Fallo en recopilar los datos del GPS.")
                     break
@@ -155,53 +135,9 @@ async def main():
                 else:
                     print('Error al enviar el incidente: {}'.format(response.status_code))
                 response.close()
-                pin_led2.off()
+                pin_led2.off() if dist_izquierdo < 10 else pin_led1.off()
 
-                
-        if dist_derecho < 10:
-            print('Distancia menor a 100 CM en el sensor izquierdo' if dist_izquierdo < 100 else 'Distancia menor a 100 CM en el sensor derecho')
-            pin_led1.on()
-            time_start = time.time()
-            while lat is None or lon is None or velocidad is None:
-                print('Buscando GPS')
-                await asyncio.sleep(0.5)
-                if time.time() - time_start > 60:
-                    print("Fallo en recopilar los datos del GPS.")
-                    break
-            if lat is not None and lon is not None and velocidad is not None:
-                timestamp = get_formatted_time()
-                incident = {
-                    "alerta": "incidente",
-                    "fecha": timestamp,
-                    "latitud": lat,
-                    "longitud": lon,
-                    "velocidad": velocidad
-                }
-                print(ujson.dumps(incident))
+        time.sleep(0.5)
 
-                # URL de la API a la que enviarás la solicitud POST
-                url = 'http://34.71.210.97:5000/save_log'
-
-                # Enviar solicitud PUT
-                response = urequests.post(url, headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + access_token}, data = ujson.dumps(incident))
-
-                # Comprueba el código de estado de la respuesta
-                if response.status_code < 400:
-                    print('Incidente enviado con éxito.')
-                else:
-                    print('Error al enviar el incidente: {}'.format(response.status_code))
-                response.close()
-                pin_led1.off()            
-
-        await asyncio.sleep(0.5)
-
-# Create an event loop
-loop = asyncio.get_event_loop()
-
-# Register the co-routines
-loop.create_task(get_speed())
-loop.create_task(get_gps())
-loop.create_task(main())
-
-# Start the event loop
-loop.run_forever()
+# Start the main function
+main()
