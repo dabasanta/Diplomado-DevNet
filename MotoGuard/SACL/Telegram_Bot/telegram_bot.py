@@ -84,7 +84,7 @@ class TelegramBot:
         hora_amanecer = datetime.strptime("06:00:00", "%H:%M:%S").time()
         hora_anochecer = datetime.strptime("18:00:00", "%H:%M:%S").time()
         ciudad = "Barranquilla"
-        api_key = "a883b381841d33055c3dbee931eb587f" 
+        api_key = "****************" 
         url = f"http://api.openweathermap.org/data/2.5/weather?q={ciudad}&appid={api_key}&units=metric"
         respuesta = requests.get(url)
         datos_clima = respuesta.json()
