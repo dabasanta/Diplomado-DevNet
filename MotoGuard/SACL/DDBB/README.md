@@ -125,6 +125,3 @@ MariaDB [(none)]>
 MariaDB [(none)]> quit
 Bye
 ```
-
-![Untitled](DB%20535cfe2e25174d5c9073e47320ab9bd0/Untitled%2012.png)
-
