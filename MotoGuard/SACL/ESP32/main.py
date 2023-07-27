@@ -5,8 +5,8 @@ import ujson
 import time
 
 # Credenciales de WiFi
-ssid = 'RedRoom'
-password = '*Skills39*'
+ssid = 'SuperSecureNetwork'
+password = '*******'
 
 # Conectarse a WiFi
 wlan = network.WLAN(network.STA_IF)
