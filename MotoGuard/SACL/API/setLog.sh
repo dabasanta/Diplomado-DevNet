@@ -2,7 +2,7 @@
 
 # Variables de autenticación
 username="admin"
-password="BestSecurePassword"
+password="*************"
 data="{\"username\":\"$username\",\"password\":\"$password\"}"
 
 # Obtener el token de autorización
