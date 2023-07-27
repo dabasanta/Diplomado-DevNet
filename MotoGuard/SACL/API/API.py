@@ -119,7 +119,7 @@ def save_log():
         
         if velocidad > 80.00:
             bot = TelegramBot("63***************************M", db_config)
-            chat_id = '486241032'
+            chat_id = '********'
             bot.send_message(chat_id='xxxxxx', text=f"*Alerta de alta velocidad:* {velocidad} KM/h")
             bot.send_location(chat_id='xxxxxxx', latitude=latitud, longitude=longitud)
 
