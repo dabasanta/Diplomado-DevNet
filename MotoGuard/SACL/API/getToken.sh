@@ -1,7 +1,7 @@
 #!/bin/bash
 
 username="admin"
-password="BestSecurePassword"
+password="***********"
 
 # URL del endpoint de login
 url="http://34.71.210.97:5000/login"
